@@ -2,7 +2,6 @@ import abc
 import time
 import functools
 import sounddevice as sd
-import numpy as np
 import wave
 import os
 from datetime import datetime
@@ -19,7 +18,7 @@ load_dotenv()
 
 fs = 44100  # Sample rate
 channels = 1  # Mono audio
-audio_chunk_size = 10
+duration = 15
 
 
 class PersonalAssistantFramework(abc.ABC):
@@ -113,7 +112,7 @@ class RoqPAF(PersonalAssistantFramework):
         pass
 
 
-def record_audio(duration=15, fs=44100, channels=1):
+def record_audio(duration=duration, fs=fs, channels=channels):
     """Record audio from the microphone."""
 
     print("🔴 Recording...")
@@ -168,9 +167,7 @@ def main():
     while True:
         try:
             input("🎧 Press Enter to start recording...")
-            recording = record_audio(
-                duration=audio_chunk_size, fs=fs, channels=channels
-            )
+            recording = record_audio(duration=duration, fs=fs, channels=channels)
 
             filename = create_audio_file(recording)
 
