@@ -8,6 +8,7 @@ from datetime import datetime
 import assemblyai as aai
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
+from modules.constants import ELEVEN_LABS_CRINGE_VOICE, ELEVEN_LABS_PRIMARY_SOLID_VOICE
 from modules.simple_llm import build_mini_model, prompt
 import threading
 from dotenv import load_dotenv
@@ -56,13 +57,14 @@ class AssElevenPAF(PersonalAssistantFramework):
 
     @PersonalAssistantFramework.timeit_decorator
     def generate_voice_audio(self, text: str):
-        audio = self.elevenlabs_client.generate(
+        audio_generator = self.elevenlabs_client.generate(
             text=text,
-            voice="WejK3H1m7MI9CHnIjW9K",
+            voice=ELEVEN_LABS_PRIMARY_SOLID_VOICE,
             model="eleven_turbo_v2",
+            stream=False,
         )
-
-        return audio
+        audio_bytes = b"".join(list(audio_generator))
+        return audio_bytes
 
     @PersonalAssistantFramework.timeit_decorator
     def transcribe(self, file_path):
@@ -95,14 +97,18 @@ class OpenAIPAF(PersonalAssistantFramework):
         return transcript.text
 
     @PersonalAssistantFramework.timeit_decorator
-    def speak(self, text: str):
+    def generate_voice_audio(self, text: str):
         response = openai.audio.speech.create(
             model="tts-1-hd", voice="shimmer", input=text, response_format="aac"
         )
+        audio_bytes = b"".join(list(response.iter_bytes()))
+        return audio_bytes
 
-        response_bytes = response.iter_bytes()
-
-        play(response_bytes)
+    def speak(self, text: str):
+        print(f"Start generating voice audio for {text}")
+        audio = self.generate_voice_audio(text)
+        print(f"End generating voice audio for {text}, len: {len(audio)}")
+        play(audio)
 
     @PersonalAssistantFramework.timeit_decorator
     def think(self, thought: str) -> str:
@@ -127,17 +133,19 @@ class GroqElevenPAF(PersonalAssistantFramework):
 
     @PersonalAssistantFramework.timeit_decorator
     def generate_voice_audio(self, text: str):
-        audio = self.elevenlabs_client.generate(
+        audio_generator = self.elevenlabs_client.generate(
             text=text,
-            voice="WejK3H1m7MI9CHnIjW9K",  # qqq
-            model="eleven_turbo_v2",
+            voice=ELEVEN_LABS_CRINGE_VOICE,
+            model="eleven_turbo_v2_5",
+            stream=False,
         )
-        return audio
+        audio_bytes = b"".join(list(audio_generator))
+        return audio_bytes
 
     def speak(self, text: str):
         print(f"Start generating voice audio for {text}")
         audio = self.generate_voice_audio(text)
-        print(f"End generating voice audio for {text}")
+        print(f"End generating voice audio for {text}, len: {len(audio)}")
         play(audio)
 
     @PersonalAssistantFramework.timeit_decorator

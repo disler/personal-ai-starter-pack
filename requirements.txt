@@ -9,7 +9,6 @@ assemblyai[extras]
 sounddevice
 numpy
 elevenlabs
-python-editor
 llm
 llm-claude
 llm-claude-3

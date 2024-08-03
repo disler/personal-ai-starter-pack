@@ -2,7 +2,24 @@
 
 PERSONAL_AI_ASSISTANT_NAME = "Ada"
 HUMAN_COMPANION_NAME = "Dan"
-ASSISTANT_TYPE = "GroqElevenPAF"  # GroqElevenPAF > OpenAIPAF > AssElevenPAF
+
+# GroqElevenPAF > OpenAIPAF > AssElevenPAF
+# ASSISTANT_TYPE = "GroqElevenPAF"
+# ASSISTANT_TYPE = "OpenAIPAF"
+ASSISTANT_TYPE = "AssElevenPAF"
+
+CONVO_TRAIL_CUTOFF = 30
+
+FS = 44100  # Sample rate
+CHANNELS = 1  # Mono audio
+DURATION = 15  # Duration of the recording in seconds
+
+ELEVEN_LABS_PRIMARY_SOLID_VOICE = "WejK3H1m7MI9CHnIjW9K"
+ELEVEN_LABS_CRINGE_VOICE = "uyfkySFC5J00qZ6iLAdh"
+
+
+# ---------------------------- PROMPT
+
 PERSONAL_AI_ASSISTANT_PROMPT_HEAD = f"""You are a friendly, ultra helpful, attentive, concise AI assistant named '{PERSONAL_AI_ASSISTANT_NAME}'.
 
 <instructions>
@@ -24,9 +41,3 @@ PERSONAL_AI_ASSISTANT_PROMPT_HEAD = f"""You are a friendly, ultra helpful, atten
 </latest-input>
 
 Your Conversational Response:"""
-
-CONVO_TRAIL_CUTOFF = 30
-
-FS = 44100  # Sample rate
-CHANNELS = 1  # Mono audio
-DURATION = 15  # Duration of the recording in seconds
