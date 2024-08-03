@@ -3,11 +3,6 @@
 PERSONAL_AI_ASSISTANT_NAME = "Ada"
 HUMAN_COMPANION_NAME = "Dan"
 
-# GroqElevenPAF > OpenAIPAF > AssElevenPAF
-# ASSISTANT_TYPE = "GroqElevenPAF"
-# ASSISTANT_TYPE = "OpenAIPAF"
-ASSISTANT_TYPE = "AssElevenPAF"
-
 CONVO_TRAIL_CUTOFF = 30
 
 FS = 44100  # Sample rate
@@ -16,6 +11,17 @@ DURATION = 15  # Duration of the recording in seconds
 
 ELEVEN_LABS_PRIMARY_SOLID_VOICE = "WejK3H1m7MI9CHnIjW9K"
 ELEVEN_LABS_CRINGE_VOICE = "uyfkySFC5J00qZ6iLAdh"
+
+
+# --------------------------- ASSISTANT TYPES ---------------------------
+
+# GroqElevenPAF > OpenAIPAF > AssElevenPAF
+
+# ASSISTANT_TYPE = "GroqElevenPAF"
+
+ASSISTANT_TYPE = "OpenAIPAF"
+
+# ASSISTANT_TYPE = "AssElevenPAF"
 
 
 # ---------------------------- PROMPT

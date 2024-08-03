@@ -4,6 +4,7 @@ import functools
 import sounddevice as sd
 import wave
 import os
+import json
 from datetime import datetime
 import assemblyai as aai
 from elevenlabs import play
@@ -25,9 +26,45 @@ class PersonalAssistantFramework(abc.ABC):
             start_time = time.time()
             result = func(*args, **kwargs)
             end_time = time.time()
+            duration = round(end_time - start_time, 2)
             print(
-                f"⏰ {args[0].__class__.__name__} - {func.__name__}() took {end_time - start_time:.2f} seconds"
+                f"⏰ {args[0].__class__.__name__} - {func.__name__}() took {duration:.2f} seconds"
             )
+            
+            json_file = f'{args[0].__class__.__name__}_time_table.json'
+            
+            # Read existing data or create an empty list
+            if os.path.exists(json_file):
+                with open(json_file, 'r') as file:
+                    try:
+                        data = json.load(file)
+                    except json.JSONDecodeError:
+                        data = []
+            else:
+                data = []
+            
+            # Create new time record
+            time_record = {
+                "assistant": args[0].__class__.__name__,
+                "function": func.__name__,
+                "duration": f"{duration:.2f}",
+                "position": 0  # New entry always at the top
+            }
+            
+            # Update positions of existing records
+            for record in data:
+                record['position'] += 1
+            
+            # Insert new record at the beginning
+            data.insert(0, time_record)
+            
+            # Sort data by position
+            data.sort(key=lambda x: x['position'])
+            
+            # Write updated data back to file
+            with open(json_file, 'w') as file:
+                json.dump(data, file, indent=2)
+            
             return result
 
         return wrapper
