@@ -1,119 +1,32 @@
-import abc
 import time
-import functools
 import sounddevice as sd
 import wave
 import os
 from datetime import datetime
-import assemblyai as aai
-from elevenlabs import play
-from elevenlabs.client import ElevenLabs
-from modules.simple_llm import build_mini_model, prompt
+from assistants.assistants import AssElevenPAF
 import threading
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
+# Simple constants
 
-fs = 44100  # Sample rate
-channels = 1  # Mono audio
-duration = 15
+PERSONAL_AI_ASSISTANT_NAME = "Ada"
+HUMAN_NAME = "Dan"
 
-
-class PersonalAssistantFramework(abc.ABC):
-    @staticmethod
-    def timeit_decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            start_time = time.time()
-            result = func(*args, **kwargs)
-            end_time = time.time()
-            print(
-                f"⏰ {args[0].__class__.__name__} - {func.__name__}() took {end_time - start_time:.2f} seconds"
-            )
-            return result
-
-        return wrapper
-
-    @abc.abstractmethod
-    def setup(self):
-        pass
-
-    @abc.abstractmethod
-    def transcribe(self, file_path):
-        pass
-
-    @abc.abstractmethod
-    def speak(self, text: str):
-        pass
-
-    @abc.abstractmethod
-    def think(self, prompt: str) -> str:
-        pass
+FS = 44100  # Sample rate
+CHANNELS = 1  # Mono audio
+DURATION = 15  # Duration of the recording in seconds
 
 
-class AssElevenPAF(PersonalAssistantFramework):
-    def setup(self):
-        aai.settings.api_key = os.getenv("ASSEMBLYAI_API_KEY")
-        self.elevenlabs_client = ElevenLabs(api_key=os.getenv("ELEVEN_API_KEY"))
-        self.llm_model = build_mini_model()
-
-    @PersonalAssistantFramework.timeit_decorator
-    def generate_voice_audio(self, text: str):
-        audio = self.elevenlabs_client.generate(
-            text=text,
-            voice="WejK3H1m7MI9CHnIjW9K",
-            model="eleven_turbo_v2",
-        )
-
-        return audio
-
-    @PersonalAssistantFramework.timeit_decorator
-    def transcribe(self, file_path):
-        transcriber = aai.Transcriber()
-        transcript = transcriber.transcribe(file_path)
-        return transcript.text
-
-    def speak(self, text: str):
-        audio = self.generate_voice_audio(text)
-        play(audio)
-
-    @PersonalAssistantFramework.timeit_decorator
-    def think(self, thought: str) -> str:
-        return prompt(self.llm_model, thought)
-
-
-class OpenPAF(PersonalAssistantFramework):
-    def setup(self):
-        pass
-
-    def transcribe(self, file_path):
-        pass
-
-    def speak(self, text: str):
-        pass
-
-    def think(self, prompt: str) -> str:
-        pass
-
-
-class RoqPAF(PersonalAssistantFramework):
-    def setup(self):
-        pass
-
-    def transcribe(self, file_path):
-        pass
-
-    def speak(self, text: str):
-        pass
-
-    def think(self, prompt: str) -> str:
-        pass
-
-
-def record_audio(duration=duration, fs=fs, channels=channels):
-    """Record audio from the microphone."""
+def record_audio(duration=DURATION, fs=FS, channels=CHANNELS):
+    """
+    Simple function to record audio from the microphone.
+    Gives you DURATION seconds of audio to speak into the microphone.
+    After DURATION seconds, the recording will stop.
+    Hit enter to stop the recording at any time.
+    """
 
     print("🔴 Recording...")
     recording = sd.rec(
@@ -143,14 +56,17 @@ def record_audio(duration=duration, fs=fs, channels=channels):
 
 
 def create_audio_file(recording):
+    """
+    Creates an audio file from the recording.
+    """
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"audio_{timestamp}.wav"
 
     with wave.open(filename, "wb") as wf:
-        wf.setnchannels(channels)
+        wf.setnchannels(CHANNELS)
         wf.setsampwidth(2)
-        wf.setframerate(fs)
+        wf.setframerate(FS)
         wf.writeframes(recording)
 
     file_size = os.path.getsize(filename)
@@ -161,13 +77,24 @@ def create_audio_file(recording):
 
 
 def main():
+    """
+    In a loop, we:
+    1. Press enter to start recording
+    2. Record audio from the microphone for N seconds
+    3. When we press enter again, we create an audio file from the recording
+    4. Transcribe the audio file
+    5. Our AI assistant thinks (prompt) of a response to the transcription
+    6. Our AI assistant speaks the response
+    7. Delete the audio file
+    """
+
     assistant = AssElevenPAF()
     assistant.setup()
 
     while True:
         try:
             input("🎧 Press Enter to start recording...")
-            recording = record_audio(duration=duration, fs=fs, channels=channels)
+            recording = record_audio(duration=DURATION, fs=FS, channels=CHANNELS)
 
             filename = create_audio_file(recording)
 
