@@ -32,3 +32,11 @@ venv.bak/
 **.pyc
 modules/__pycache__
 
+*.mp3
+*.mp4
+*.wav
+*.aac
+*.ogg
+*.flac
+*.m4a
+*.mp4
