@@ -1,15 +1,15 @@
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional, Union
 
+import warnings
+
+# Suppress specific warnings
+warnings.filterwarnings("ignore", message="Valid config keys have changed in V2:")
+warnings.filterwarnings(
+    "ignore", message='Field "model_id" has conflict with protected namespace "model_".'
+)
+
 
 class Interaction(BaseModel):
     role: str
     content: str
-
-
-class FusionChainResult(BaseModel):
-    top_response: Union[str, Dict[str, Any]]
-    all_prompt_responses: List[List[Any]]
-    all_context_filled_prompts: List[List[str]]
-    performance_scores: List[float]
-    chain_model_names: List[str]

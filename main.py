@@ -19,7 +19,6 @@ from modules.constants import (
 
 from modules.typings import Interaction
 
-# Load environment variables from .env file
 load_dotenv()
 
 

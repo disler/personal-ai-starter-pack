@@ -40,3 +40,5 @@ modules/__pycache__
 *.flac
 *.m4a
 *.mp4
+
+*.json

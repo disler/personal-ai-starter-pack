@@ -15,11 +15,9 @@ ELEVEN_LABS_CRINGE_VOICE = "uyfkySFC5J00qZ6iLAdh"
 
 # --------------------------- ASSISTANT TYPES ---------------------------
 
-# GroqElevenPAF > OpenAIPAF > AssElevenPAF
+ASSISTANT_TYPE = "GroqElevenPAF"
 
-# ASSISTANT_TYPE = "GroqElevenPAF"
-
-ASSISTANT_TYPE = "OpenAIPAF"
+# ASSISTANT_TYPE = "OpenAIPAF"
 
 # ASSISTANT_TYPE = "AssElevenPAF"
 

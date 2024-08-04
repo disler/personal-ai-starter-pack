@@ -14,7 +14,6 @@ from modules.simple_llm import build_mini_model, prompt
 import threading
 from dotenv import load_dotenv
 import openai
-import openai
 from groq import Groq
 
 
@@ -30,41 +29,41 @@ class PersonalAssistantFramework(abc.ABC):
             print(
                 f"⏰ {args[0].__class__.__name__} - {func.__name__}() took {duration:.2f} seconds"
             )
-            
-            json_file = f'{args[0].__class__.__name__}_time_table.json'
-            
+
+            json_file = f"{args[0].__class__.__name__}_time_table.json"
+
             # Read existing data or create an empty list
             if os.path.exists(json_file):
-                with open(json_file, 'r') as file:
+                with open(json_file, "r") as file:
                     try:
                         data = json.load(file)
                     except json.JSONDecodeError:
                         data = []
             else:
                 data = []
-            
+
             # Create new time record
             time_record = {
                 "assistant": args[0].__class__.__name__,
                 "function": func.__name__,
                 "duration": f"{duration:.2f}",
-                "position": 0  # New entry always at the top
+                "position": 0,  # New entry always at the top
             }
-            
+
             # Update positions of existing records
             for record in data:
-                record['position'] += 1
-            
+                record["position"] += 1
+
             # Insert new record at the beginning
             data.insert(0, time_record)
-            
+
             # Sort data by position
-            data.sort(key=lambda x: x['position'])
-            
+            data.sort(key=lambda x: x["position"])
+
             # Write updated data back to file
-            with open(json_file, 'w') as file:
+            with open(json_file, "w") as file:
                 json.dump(data, file, indent=2)
-            
+
             return result
 
         return wrapper
@@ -110,9 +109,7 @@ class AssElevenPAF(PersonalAssistantFramework):
         return transcript.text
 
     def speak(self, text: str):
-        print(f"Start generating voice audio for {text}")
         audio = self.generate_voice_audio(text)
-        print(f"End generating voice audio for {text}")
         play(audio)
 
     @PersonalAssistantFramework.timeit_decorator
@@ -129,7 +126,8 @@ class OpenAIPAF(PersonalAssistantFramework):
     def transcribe(self, file_path):
         with open(file_path, "rb") as audio_file:
             transcript = openai.audio.transcriptions.create(
-                model="whisper-1", file=audio_file
+                model="whisper-1",  # this points to whisper v2. See Docs (https://platform.openai.com/docs/api-reference/audio/createTranscription)
+                file=audio_file,
             )
         return transcript.text
 
@@ -142,9 +140,7 @@ class OpenAIPAF(PersonalAssistantFramework):
         return audio_bytes
 
     def speak(self, text: str):
-        print(f"Start generating voice audio for {text}")
         audio = self.generate_voice_audio(text)
-        print(f"End generating voice audio for {text}, len: {len(audio)}")
         play(audio)
 
     @PersonalAssistantFramework.timeit_decorator
@@ -180,9 +176,7 @@ class GroqElevenPAF(PersonalAssistantFramework):
         return audio_bytes
 
     def speak(self, text: str):
-        print(f"Start generating voice audio for {text}")
         audio = self.generate_voice_audio(text)
-        print(f"End generating voice audio for {text}, len: {len(audio)}")
         play(audio)
 
     @PersonalAssistantFramework.timeit_decorator
