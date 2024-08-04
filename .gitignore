@@ -28,7 +28,6 @@ venv.bak/
 .aider*
 
 *.wav
-*.png
 **.pyc
 modules/__pycache__
 
