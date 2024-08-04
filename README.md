@@ -3,6 +3,8 @@
 >
 > A quick start personal AI assistant framework using OpenAI, Groq, AssemblyAI and ElevenLabs.
 
+![own-your-ai](./img/own-your-ai.png)
+
 ## Setup
 
 - Create and activate virtual environment:
@@ -33,7 +35,12 @@
 - Adjust the maximum duration of the recording in `constants.py: DURATION`
 
 - Update configuration variables in `constants.py`
+  - Tweak naming.
+  - Update the prompt to your liking.
+  - Update the assistant type to the one you want to use.
 
+## Watch the walk through video
+[CONTROL your Personal AI Assistant with GPT-4o mini & ElevenLabs](https://youtu.be/ikaKpfUOb0U)
 
 ## Resources
 https://www.assemblyai.com/ 
