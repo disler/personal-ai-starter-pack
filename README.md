@@ -43,10 +43,10 @@
 [CONTROL your Personal AI Assistant with GPT-4o mini & ElevenLabs](https://youtu.be/ikaKpfUOb0U)
 
 ## Resources
-https://www.assemblyai.com/ 
-https://console.groq.com/docs/speech-text
-https://console.groq.com/docs/libraries
-https://platform.openai.com/docs/guides/speech-to-text
-https://platform.openai.com/docs/guides/text-to-speech
-https://platform.openai.com/docs/api-reference/audio#audio/createTranscription-prompt
-https://openai.com/api/pricing/
+- https://www.assemblyai.com/ 
+- https://console.groq.com/docs/speech-text
+- https://console.groq.com/docs/libraries
+- https://platform.openai.com/docs/guides/speech-to-text
+- https://platform.openai.com/docs/guides/text-to-speech
+- https://platform.openai.com/docs/api-reference/audio#audio/createTranscription-prompt
+- https://openai.com/api/pricing/
