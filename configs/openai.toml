@@ -1,0 +1,2 @@
+ASSISTANT_TYPE = "OpenAIPAF"
+# Add other OpenAI-specific configurations here

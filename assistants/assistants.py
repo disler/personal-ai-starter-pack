@@ -9,13 +9,15 @@ from datetime import datetime
 import assemblyai as aai
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
-from modules.constants import ELEVEN_LABS_CRINGE_VOICE, ELEVEN_LABS_PRIMARY_SOLID_VOICE
+from modules.constants import get_active_config
 from modules.simple_llm import build_mini_model, prompt
 import threading
 from dotenv import load_dotenv
 import openai
 from groq import Groq
 
+# Get the active configuration
+config = get_active_config()
 
 class PersonalAssistantFramework(abc.ABC):
     @staticmethod
@@ -95,7 +97,7 @@ class AssElevenPAF(PersonalAssistantFramework):
     def generate_voice_audio(self, text: str):
         audio_generator = self.elevenlabs_client.generate(
             text=text,
-            voice=ELEVEN_LABS_PRIMARY_SOLID_VOICE,
+            voice=config["ELEVEN_LABS_PRIMARY_SOLID_VOICE"],
             model="eleven_turbo_v2",
             stream=False,
         )
@@ -168,7 +170,7 @@ class GroqElevenPAF(PersonalAssistantFramework):
     def generate_voice_audio(self, text: str):
         audio_generator = self.elevenlabs_client.generate(
             text=text,
-            voice=ELEVEN_LABS_CRINGE_VOICE,
+            voice=config["WHEATLEY"],
             model="eleven_turbo_v2_5",
             stream=False,
         )
