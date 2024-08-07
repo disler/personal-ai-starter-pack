@@ -8,12 +8,12 @@ from datetime import datetime
 from assistants.assistants import AssElevenPAF, GroqElevenPAF, OpenAIPAF
 import threading
 from dotenv import load_dotenv
-from modules.constants import get_active_config
+from modules.constants import load_config
 
 load_dotenv()
 
 # Get the active configuration
-config = get_active_config()
+config = load_config()
 
 def record_audio(duration=config["DURATION"], fs=config["FS"], channels=config["CHANNELS"]):
     """
@@ -81,9 +81,13 @@ def build_prompt(latest_input: str, previous_interactions: List[Interaction]) ->
             for interaction in previous_interactions
         ]
     )
-    prepared_prompt = config["PERSONAL_AI_ASSISTANT_PROMPT_HEAD"].replace(
-        "[[previous_interactions]]", previous_interactions_str
-    ).replace("[[latest_input]]", latest_input)
+    prepared_prompt = (
+        config["PERSONAL_AI_ASSISTANT_PROMPT_HEAD"]
+        .replace("[[previous_interactions]]", previous_interactions_str)
+        .replace("[[latest_input]]", latest_input)
+        .replace("[[PERSONAL_AI_ASSISTANT_NAME]]", config["PERSONAL_AI_ASSISTANT_NAME"])
+        .replace("[[HUMAN_COMPANION_NAME]]", config["HUMAN_COMPANION_NAME"])
+    )
 
     return prepared_prompt
 

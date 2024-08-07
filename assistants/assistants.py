@@ -9,7 +9,7 @@ from datetime import datetime
 import assemblyai as aai
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
-from modules.constants import get_active_config
+from modules.constants import load_config
 from modules.simple_llm import build_mini_model, prompt
 import threading
 from dotenv import load_dotenv
@@ -17,7 +17,7 @@ import openai
 from groq import Groq
 
 # Get the active configuration
-config = get_active_config()
+config = load_config()
 
 class PersonalAssistantFramework(abc.ABC):
     @staticmethod
@@ -97,7 +97,7 @@ class AssElevenPAF(PersonalAssistantFramework):
     def generate_voice_audio(self, text: str):
         audio_generator = self.elevenlabs_client.generate(
             text=text,
-            voice=config["ELEVEN_LABS_PRIMARY_SOLID_VOICE"],
+            voice=config["ELEVEN_LABS_VOICE"],
             model="eleven_turbo_v2",
             stream=False,
         )
@@ -136,7 +136,7 @@ class OpenAIPAF(PersonalAssistantFramework):
     @PersonalAssistantFramework.timeit_decorator
     def generate_voice_audio(self, text: str):
         response = openai.audio.speech.create(
-            model="tts-1-hd", voice="shimmer", input=text, response_format="aac"
+            model="tts-1-hd", voice=config["OPENAI_VOICE"], input=text, response_format="aac"
         )
         audio_bytes = b"".join(list(response.iter_bytes()))
         return audio_bytes
@@ -170,7 +170,7 @@ class GroqElevenPAF(PersonalAssistantFramework):
     def generate_voice_audio(self, text: str):
         audio_generator = self.elevenlabs_client.generate(
             text=text,
-            voice=config["WHEATLEY"],
+            voice=config["ELEVEN_LABS_VOICE"],
             model="eleven_turbo_v2_5",
             stream=False,
         )
