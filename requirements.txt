@@ -8,6 +8,7 @@ assemblyai
 assemblyai[extras]
 sounddevice
 numpy
+toml
 elevenlabs
 llm
 llm-claude

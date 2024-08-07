@@ -8,21 +8,14 @@ from datetime import datetime
 from assistants.assistants import AssElevenPAF, GroqElevenPAF, OpenAIPAF
 import threading
 from dotenv import load_dotenv
-from modules.constants import (
-    PERSONAL_AI_ASSISTANT_PROMPT_HEAD,
-    FS,
-    CHANNELS,
-    DURATION,
-    CONVO_TRAIL_CUTOFF,
-    ASSISTANT_TYPE,
-)
-
-from modules.typings import Interaction
+from modules.constants import load_config
 
 load_dotenv()
 
+# Get the active configuration
+config = load_config()
 
-def record_audio(duration=DURATION, fs=FS, channels=CHANNELS):
+def record_audio(duration=config["DURATION"], fs=config["FS"], channels=config["CHANNELS"]):
     """
     Simple function to record audio from the microphone.
     Gives you DURATION seconds of audio to speak into the microphone.
@@ -66,9 +59,9 @@ def create_audio_file(recording):
     filename = f"audio_{timestamp}.wav"
 
     with wave.open(filename, "wb") as wf:
-        wf.setnchannels(CHANNELS)
+        wf.setnchannels(config["CHANNELS"])
         wf.setsampwidth(2)
-        wf.setframerate(FS)
+        wf.setframerate(config["FS"])
         wf.writeframes(recording)
 
     file_size = os.path.getsize(filename)
@@ -88,9 +81,13 @@ def build_prompt(latest_input: str, previous_interactions: List[Interaction]) ->
             for interaction in previous_interactions
         ]
     )
-    prepared_prompt = PERSONAL_AI_ASSISTANT_PROMPT_HEAD.replace(
-        "[[previous_interactions]]", previous_interactions_str
-    ).replace("[[latest_input]]", latest_input)
+    prepared_prompt = (
+        config["PERSONAL_AI_ASSISTANT_PROMPT_HEAD"]
+        .replace("[[previous_interactions]]", previous_interactions_str)
+        .replace("[[latest_input]]", latest_input)
+        .replace("[[PERSONAL_AI_ASSISTANT_NAME]]", config["PERSONAL_AI_ASSISTANT_NAME"])
+        .replace("[[HUMAN_COMPANION_NAME]]", config["HUMAN_COMPANION_NAME"])
+    )
 
     return prepared_prompt
 
@@ -110,30 +107,24 @@ def main():
 
     previous_interactions: List[Interaction] = []
 
-    if ASSISTANT_TYPE == "OpenAIPAF":
-
+    if config["ASSISTANT_TYPE"] == "OpenAIPAF":
         assistant = OpenAIPAF()
         print("🚀 Initialized OpenAI Personal AI Assistant...")
-
-    elif ASSISTANT_TYPE == "AssElevenPAF":
-
+    elif config["ASSISTANT_TYPE"] == "AssElevenPAF":
         assistant = AssElevenPAF()
         print("🚀 Initialized AssemblyAI-ElevenLabs Personal AI Assistant...")
-
-    elif ASSISTANT_TYPE == "GroqElevenPAF":
-
+    elif config["ASSISTANT_TYPE"] == "GroqElevenPAF":
         assistant = GroqElevenPAF()
         print("🚀 Initialized Groq-ElevenLabs Personal AI Assistant...")
-
     else:
-        raise ValueError(f"Invalid assistant type: {ASSISTANT_TYPE}")
+        raise ValueError(f"Invalid assistant type: {config['ASSISTANT_TYPE']}")
 
     assistant.setup()
 
     while True:
         try:
             input("🎧 Press Enter to start recording...")
-            recording = record_audio(duration=DURATION, fs=FS, channels=CHANNELS)
+            recording = record_audio(duration=config["DURATION"], fs=config["FS"], channels=config["CHANNELS"])
 
             filename = create_audio_file(recording)
             transcription = assistant.transcribe(filename)
@@ -158,8 +149,8 @@ def main():
             )
 
             # Keep only the last CONVO_TRAIL_CUTOFF interactions
-            if len(previous_interactions) > CONVO_TRAIL_CUTOFF:
-                previous_interactions = previous_interactions[-CONVO_TRAIL_CUTOFF:]
+            if len(previous_interactions) > config["CONVO_TRAIL_CUTOFF"]:
+                previous_interactions = previous_interactions[-config["CONVO_TRAIL_CUTOFF"]:]
 
             print("\nReady for next interaction. Press Ctrl+C to exit.")
         except KeyboardInterrupt:
