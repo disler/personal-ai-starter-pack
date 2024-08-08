@@ -57,13 +57,18 @@ def record_audio(duration=DURATION, fs=FS, channels=CHANNELS):
     return recording
 
 
+def ensure_data_directory_exists():
+    if not os.path.exists("data"):
+        os.makedirs("data")
+
 def create_audio_file(recording):
+    ensure_data_directory_exists()
     """
     Creates an audio file from the recording.
     """
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"audio_{timestamp}.wav"
+    filename = os.path.join("data", f"audio_{timestamp}.wav")
 
     with wave.open(filename, "wb") as wf:
         wf.setnchannels(CHANNELS)
