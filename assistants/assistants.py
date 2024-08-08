@@ -13,7 +13,6 @@ from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 from modules.constants import ELEVEN_LABS_CRINGE_VOICE, ELEVEN_LABS_PRIMARY_SOLID_VOICE
 from modules.simple_llm import build_mini_model, build_new_gpt4o, prompt
-import threading
 from dotenv import load_dotenv
 import openai
 from groq import Groq
