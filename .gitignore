@@ -41,3 +41,5 @@ modules/__pycache__
 *.mp4
 
 *.json
+
+data/

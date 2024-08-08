@@ -13,3 +13,30 @@ warnings.filterwarnings(
 class Interaction(BaseModel):
     role: str
     content: str
+
+
+from enum import Enum
+
+
+class ImageRatio(str, Enum):
+    SQUARE = "1024x1024"
+    PORTRAIT = "1024x1792"
+    LANDSCAPE = "1792x1024"
+
+
+class Style(str, Enum):
+    VIVID = "vivid"
+    NATURAL = "natural"
+
+
+class Quality(str, Enum):
+    STANDARD = "standard"
+    HD = "hd"
+
+
+class GenerateImageParams(BaseModel):
+    prompts: List[str]
+    quality: Quality
+    image_ratio: Optional[ImageRatio]
+    variate: Optional[bool]
+    style: Optional[Style]

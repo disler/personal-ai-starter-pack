@@ -5,10 +5,11 @@ import sounddevice as sd
 import wave
 import os
 from datetime import datetime
-from assistants.assistants import AssElevenPAF, GroqElevenPAF, OpenAIPAF
+from assistants.assistants import OpenAISuperPAF
 import threading
 from dotenv import load_dotenv
 from modules.constants import (
+    OPENAI_SUPER_ASSISTANT_PROMPT_HEAD,
     PERSONAL_AI_ASSISTANT_PROMPT_HEAD,
     FS,
     CHANNELS,
@@ -18,6 +19,7 @@ from modules.constants import (
 )
 
 from modules.typings import Interaction
+from assistants.assistants import OpenAISuperPAF, OpenAIPAF, AssElevenPAF, GroqElevenPAF
 
 load_dotenv()
 
@@ -61,6 +63,7 @@ def ensure_data_directory_exists():
     if not os.path.exists("data"):
         os.makedirs("data")
 
+
 def create_audio_file(recording):
     ensure_data_directory_exists()
     """
@@ -84,6 +87,13 @@ def create_audio_file(recording):
 
 
 def build_prompt(latest_input: str, previous_interactions: List[Interaction]) -> str:
+
+    base_prompt = PERSONAL_AI_ASSISTANT_PROMPT_HEAD
+
+    if ASSISTANT_TYPE == "OpenAISuperPAF":
+        print(f"🚀 Using OpenAI Super Personal AI Assistant Prompt...")
+        base_prompt = OPENAI_SUPER_ASSISTANT_PROMPT_HEAD
+
     previous_interactions_str = "\n".join(
         [
             f"""<interaction>
@@ -93,9 +103,11 @@ def build_prompt(latest_input: str, previous_interactions: List[Interaction]) ->
             for interaction in previous_interactions
         ]
     )
-    prepared_prompt = PERSONAL_AI_ASSISTANT_PROMPT_HEAD.replace(
+    prepared_prompt = base_prompt.replace(
         "[[previous_interactions]]", previous_interactions_str
-    ).replace("[[latest_input]]", latest_input)
+    )
+
+    prepared_prompt = prepared_prompt.replace("[[latest_input]]", latest_input)
 
     return prepared_prompt
 
@@ -103,6 +115,7 @@ def build_prompt(latest_input: str, previous_interactions: List[Interaction]) ->
 def main():
     """
     In a loop, we:
+
     1. Press enter to start recording
     2. Record audio from the microphone for N seconds
     3. When we press enter again, we create an audio file from the recording
@@ -115,21 +128,18 @@ def main():
 
     previous_interactions: List[Interaction] = []
 
-    if ASSISTANT_TYPE == "OpenAIPAF":
-
+    if ASSISTANT_TYPE == "OpenAISuperPAF":
+        assistant = OpenAISuperPAF()
+        print("🚀 Initialized OpenAI Super Personal AI Assistant...")
+    elif ASSISTANT_TYPE == "OpenAIPAF":
         assistant = OpenAIPAF()
         print("🚀 Initialized OpenAI Personal AI Assistant...")
-
     elif ASSISTANT_TYPE == "AssElevenPAF":
-
         assistant = AssElevenPAF()
         print("🚀 Initialized AssemblyAI-ElevenLabs Personal AI Assistant...")
-
     elif ASSISTANT_TYPE == "GroqElevenPAF":
-
         assistant = GroqElevenPAF()
         print("🚀 Initialized Groq-ElevenLabs Personal AI Assistant...")
-
     else:
         raise ValueError(f"Invalid assistant type: {ASSISTANT_TYPE}")
 

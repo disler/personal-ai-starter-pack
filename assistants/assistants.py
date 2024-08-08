@@ -1,6 +1,8 @@
 import abc
 import time
 import functools
+import uuid
+import requests
 import sounddevice as sd
 import wave
 import os
@@ -10,11 +12,13 @@ import assemblyai as aai
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 from modules.constants import ELEVEN_LABS_CRINGE_VOICE, ELEVEN_LABS_PRIMARY_SOLID_VOICE
-from modules.simple_llm import build_mini_model, prompt
+from modules.simple_llm import build_mini_model, build_new_gpt4o, prompt
 import threading
 from dotenv import load_dotenv
 import openai
 from groq import Groq
+
+from modules.typings import GenerateImageParams, ImageRatio, Style
 
 
 class PersonalAssistantFramework(abc.ABC):
@@ -182,3 +186,98 @@ class GroqElevenPAF(PersonalAssistantFramework):
     @PersonalAssistantFramework.timeit_decorator
     def think(self, thought: str) -> str:
         return prompt(self.llm_model, thought)
+
+
+class OpenAISuperPAF(OpenAIPAF):
+    def setup(self):
+        super().setup()
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        self.weak_model = build_mini_model()
+        self.download_directory = os.path.join(os.getcwd(), "data", "images")
+        if not os.path.exists(self.download_directory):
+            os.makedirs(self.download_directory)
+
+    def generate_image(self, generate_image_params: GenerateImageParams) -> bool:
+
+        # handle defaults
+        if generate_image_params.image_ratio is None:
+            generate_image_params.image_ratio = ImageRatio.SQUARE
+        if generate_image_params.quality is None:
+            generate_image_params.quality = "hd"
+        if generate_image_params.style is None:
+            generate_image_params.style = Style.NATURAL
+
+        client = openai.OpenAI()
+        image_urls = []
+
+        for prompt in generate_image_params.prompts:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size=generate_image_params.image_ratio.value,
+                quality=generate_image_params.quality,
+                n=1,
+                style=generate_image_params.style.value,
+            )
+            image_urls.append(response.data[0].url)
+
+        # download images
+        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+        subdirectory = os.path.join(self.download_directory, current_datetime)
+        if not os.path.exists(subdirectory):
+            os.makedirs(subdirectory)
+
+        for index, image_url in enumerate(image_urls):
+            response = requests.get(image_url)
+            image_path = os.path.join(subdirectory, f"{index}.png")
+            with open(image_path, "wb") as file:
+                file.write(response.content)
+
+        return True
+
+    def think(self, thought: str) -> str:
+        client = openai.OpenAI()
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": thought},
+            ],
+            tools=[
+                openai.pydantic_function_tool(GenerateImageParams),
+            ],
+        )
+
+        message = completion.choices[0].message
+
+        if message.tool_calls:
+
+            tool_call = message.tool_calls[0]
+
+            print(
+                f"""Tool call found: '{tool_call.function.name}(
+{tool_call.function.parsed_arguments}
+)'. Calling..."""
+            )
+
+            success = False
+
+            if tool_call.function.name == "GenerateImageParams":
+
+                # 🚀 GUARANTEED OUTPUT STRUCTURE 🚀
+                generate_image_params: GenerateImageParams = (
+                    tool_call.function.parsed_arguments
+                )
+
+                success = self.generate_image(generate_image_params)
+
+            tool_call_success_prompt: str = (
+                "Let your human companion know that you have successfully generated images. Respond in a short, conversational manner."
+            )
+
+            if success:
+                return prompt(self.weak_model, tool_call_success_prompt)
+
+        else:
+            # just a normal thought
+            return prompt(self.weak_model, thought)

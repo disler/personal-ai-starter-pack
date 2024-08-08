@@ -68,3 +68,12 @@ def build_mini_model():
     gpt4_o_mini_model.key = OPENAI_API_KEY
 
     return gpt4_o_mini_model
+
+
+def build_new_gpt4o():
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+    gpt4_o_model: llm.Model = llm.get_model("gpt-4o-2024-08-06")
+    gpt4_o_model.key = OPENAI_API_KEY
+
+    return gpt4_o_model
