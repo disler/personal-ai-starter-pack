@@ -208,9 +208,13 @@ class OpenAISuperPAF(OpenAIPAF):
             generate_image_params.style = Style.NATURAL
 
         client = openai.OpenAI()
-        image_urls = []
+        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+        subdirectory = os.path.join(self.download_directory, current_datetime)
+        if not os.path.exists(subdirectory):
+            os.makedirs(subdirectory)
 
-        for prompt in generate_image_params.prompts:
+        for index, prompt in enumerate(generate_image_params.prompts):
+            print(f"🖼️ Generating image {index + 1} with prompt: {prompt}")
             response = client.images.generate(
                 model="dall-e-3",
                 prompt=prompt,
@@ -219,19 +223,11 @@ class OpenAISuperPAF(OpenAIPAF):
                 n=1,
                 style=generate_image_params.style.value,
             )
-            image_urls.append(response.data[0].url)
-
-        # download images
-        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-        subdirectory = os.path.join(self.download_directory, current_datetime)
-        if not os.path.exists(subdirectory):
-            os.makedirs(subdirectory)
-
-        for index, image_url in enumerate(image_urls):
-            response = requests.get(image_url)
+            image_url = response.data[0].url
+            image_response = requests.get(image_url)
             image_path = os.path.join(subdirectory, f"{index}.png")
             with open(image_path, "wb") as file:
-                file.write(response.content)
+                file.write(image_response.content)
 
         return True
 
@@ -254,10 +250,15 @@ class OpenAISuperPAF(OpenAIPAF):
 
             tool_call = message.tool_calls[0]
 
+            pretty_parsed_arguments = (
+                tool_call.function.parsed_arguments.model_dump_json(indent=2)
+            )
+
             print(
                 f"""Tool call found: '{tool_call.function.name}(
-{tool_call.function.parsed_arguments}
-)'. Calling..."""
+{pretty_parsed_arguments}
+)'. 
+Calling..."""
             )
 
             success = False
@@ -272,7 +273,7 @@ class OpenAISuperPAF(OpenAIPAF):
                 success = self.generate_image(generate_image_params)
 
             tool_call_success_prompt: str = (
-                "Let your human companion know that you have successfully generated images. Respond in a short, conversational manner."
+                "Quickly let your human companion know that you've run the 'GenerateImageParams' tool. Respond in a short, conversational manner, no fluff."
             )
 
             if success:
