@@ -13,7 +13,7 @@ from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 from PIL import Image
 from modules.constants import (
-    IMAGE_DIR,
+    OPENAI_IMG_AGENT_DIR,
     ELEVEN_LABS_CRINGE_VOICE,
     ELEVEN_LABS_PRIMARY_SOLID_VOICE,
 )
@@ -203,7 +203,7 @@ class OpenAISuperPAF(OpenAIPAF):
         super().setup()
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.weak_model = build_mini_model()
-        self.download_directory = os.path.join(os.getcwd(), IMAGE_DIR)
+        self.download_directory = os.path.join(os.getcwd(), OPENAI_IMG_AGENT_DIR)
         if not os.path.exists(self.download_directory):
             os.makedirs(self.download_directory)
 
@@ -279,7 +279,10 @@ class OpenAISuperPAF(OpenAIPAF):
                 print(f"🟡 Warning: File {input_path} does not exist. Skipping.")
                 continue
 
-            output_path = os.path.join(subdirectory, f"version_{index}_resized_w{resize_image_params.width}_h{resize_image_params.height}.png")
+            output_path = os.path.join(
+                subdirectory,
+                f"version_{index}_resized_w{resize_image_params.width}_h{resize_image_params.height}.png",
+            )
 
             try:
                 with Image.open(input_path) as img:

@@ -38,7 +38,6 @@ class GenerateImageParams(BaseModel):
     prompts: List[str]
     quality: Quality
     image_ratio: Optional[ImageRatio]
-    variate: Optional[bool]
     style: Optional[Style]
 
 

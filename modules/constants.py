@@ -12,7 +12,7 @@ DURATION = 30  # Duration of the recording in seconds
 ELEVEN_LABS_PRIMARY_SOLID_VOICE = "WejK3H1m7MI9CHnIjW9K"
 ELEVEN_LABS_CRINGE_VOICE = "uyfkySFC5J00qZ6iLAdh"
 
-IMAGE_DIR = "data/images/openai"
+OPENAI_IMG_AGENT_DIR = "data/images/openai"
 
 
 # --------------------------- ASSISTANT TYPES ---------------------------
@@ -73,7 +73,10 @@ OPENAI_SUPER_ASSISTANT_PROMPT_HEAD = f"""You are a friendly, ultra helpful, atte
                 Unless otherwise specified, default quality to 'hd'.
             </detail>
             <detail>
-                If a user asks for a certain number of images, fill the prompts parameter with that number of prompts. If the user asks for variations, be sure to variate each prompt with your own creative spin.
+                If a user asks for a certain number of images, append additional prompts parameter with that number of prompts.
+            </detail>
+            <detail>
+                Be sure to create as many images as the user requested by adding them to the prompts parameter.
             </detail>
         </parameter-details>
     </image-generation>
