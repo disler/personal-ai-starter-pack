@@ -11,13 +11,24 @@ from datetime import datetime
 import assemblyai as aai
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
-from modules.constants import ELEVEN_LABS_CRINGE_VOICE, ELEVEN_LABS_PRIMARY_SOLID_VOICE
+from PIL import Image
+from modules.constants import (
+    IMAGE_DIR,
+    ELEVEN_LABS_CRINGE_VOICE,
+    ELEVEN_LABS_PRIMARY_SOLID_VOICE,
+)
 from modules.simple_llm import build_mini_model, build_new_gpt4o, prompt
 from dotenv import load_dotenv
 import openai
 from groq import Groq
 
-from modules.typings import GenerateImageParams, ImageRatio, Style
+from modules.typings import (
+    ConvertImageParams,
+    GenerateImageParams,
+    ImageRatio,
+    Style,
+    ResizeImageParams,
+)
 
 
 class PersonalAssistantFramework(abc.ABC):
@@ -192,7 +203,7 @@ class OpenAISuperPAF(OpenAIPAF):
         super().setup()
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.weak_model = build_mini_model()
-        self.download_directory = os.path.join(os.getcwd(), "data", "images")
+        self.download_directory = os.path.join(os.getcwd(), IMAGE_DIR)
         if not os.path.exists(self.download_directory):
             os.makedirs(self.download_directory)
 
@@ -207,8 +218,7 @@ class OpenAISuperPAF(OpenAIPAF):
             generate_image_params.style = Style.NATURAL
 
         client = openai.OpenAI()
-        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-        subdirectory = os.path.join(self.download_directory, current_datetime)
+        subdirectory = os.path.join(self.download_directory)
         if not os.path.exists(subdirectory):
             os.makedirs(subdirectory)
 
@@ -224,9 +234,63 @@ class OpenAISuperPAF(OpenAIPAF):
             )
             image_url = response.data[0].url
             image_response = requests.get(image_url)
-            image_path = os.path.join(subdirectory, f"{index}.png")
+            image_path = os.path.join(subdirectory, f"version_{index}.png")
             with open(image_path, "wb") as file:
                 file.write(image_response.content)
+
+        return True
+
+    def convert_image(self, convert_image_params: ConvertImageParams) -> bool:
+        subdirectory = os.path.join(self.download_directory)
+        if not os.path.exists(subdirectory):
+            os.makedirs(subdirectory)
+
+        for index in convert_image_params.version_numbers:
+            input_path = os.path.join(subdirectory, f"version_{index}.png")
+            if not os.path.exists(input_path):
+                print(f"🟡 Warning: File {input_path} does not exist. Skipping.")
+                continue
+
+            output_path = os.path.join(
+                subdirectory, f"version_{index}.{convert_image_params.image_format}"
+            )
+
+            try:
+                with Image.open(input_path) as img:
+                    img.save(
+                        output_path,
+                        format=convert_image_params.image_format.value.upper(),
+                    )
+                print(f"🖼️ Converted {input_path} to {output_path}")
+            except Exception as e:
+                print(f"Error converting {input_path}: {str(e)}")
+                return False
+
+        return True
+
+    def resize_image(self, resize_image_params: ResizeImageParams) -> bool:
+        subdirectory = os.path.join(self.download_directory)
+        if not os.path.exists(subdirectory):
+            os.makedirs(subdirectory)
+
+        for index in resize_image_params.version_numbers:
+            input_path = os.path.join(subdirectory, f"version_{index}.png")
+            if not os.path.exists(input_path):
+                print(f"🟡 Warning: File {input_path} does not exist. Skipping.")
+                continue
+
+            output_path = os.path.join(subdirectory, f"version_{index}_resized_w{resize_image_params.width}_h{resize_image_params.height}.png")
+
+            try:
+                with Image.open(input_path) as img:
+                    resized_img = img.resize(
+                        (resize_image_params.width, resize_image_params.height)
+                    )
+                    resized_img.save(output_path)
+                print(f"🖼️ Resized {input_path} to {output_path}")
+            except Exception as e:
+                print(f"Error resizing {input_path}: {str(e)}")
+                return False
 
         return True
 
@@ -240,6 +304,8 @@ class OpenAISuperPAF(OpenAIPAF):
             ],
             tools=[
                 openai.pydantic_function_tool(GenerateImageParams),
+                openai.pydantic_function_tool(ConvertImageParams),
+                openai.pydantic_function_tool(ResizeImageParams),
             ],
         )
 
@@ -262,18 +328,34 @@ Calling..."""
 
             success = False
 
+            # TOOL 1
             if tool_call.function.name == "GenerateImageParams":
-
                 # 🚀 GUARANTEED OUTPUT STRUCTURE 🚀
                 generate_image_params: GenerateImageParams = (
                     tool_call.function.parsed_arguments
                 )
-
                 success = self.generate_image(generate_image_params)
-
-            tool_call_success_prompt: str = (
-                "Quickly let your human companion know that you've run the 'GenerateImageParams' tool. Respond in a short, conversational manner, no fluff."
-            )
+                tool_call_success_prompt = "Quickly let your human companion know that you've run the 'GenerateImageParams' tool. Respond in a short, conversational manner, no fluff."
+            # TOOL 2
+            elif tool_call.function.name == "ConvertImageParams":
+                # 🚀 GUARANTEED OUTPUT STRUCTURE 🚀
+                convert_image_params: ConvertImageParams = (
+                    tool_call.function.parsed_arguments
+                )
+                success = self.convert_image(convert_image_params)
+                tool_call_success_prompt = "Quickly let your human companion know that you've run the 'ConvertImageParams' tool. Respond in a short, conversational manner, no fluff."
+            elif tool_call.function.name == "ResizeImageParams":
+                # 🚀 GUARANTEED OUTPUT STRUCTURE 🚀
+                resize_image_params: ResizeImageParams = (
+                    tool_call.function.parsed_arguments
+                )
+                success = self.resize_image(resize_image_params)
+                tool_call_success_prompt = "Quickly let your human companion know that you've run the 'ResizeImageParams' tool. Respond in a short, conversational manner, no fluff."
+            else:
+                success = False
+                tool_call_success_prompt = (
+                    "An unknown tool was called. Please try again."
+                )
 
             if success:
                 return prompt(self.weak_model, tool_call_success_prompt)

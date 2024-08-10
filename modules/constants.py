@@ -12,6 +12,8 @@ DURATION = 30  # Duration of the recording in seconds
 ELEVEN_LABS_PRIMARY_SOLID_VOICE = "WejK3H1m7MI9CHnIjW9K"
 ELEVEN_LABS_CRINGE_VOICE = "uyfkySFC5J00qZ6iLAdh"
 
+IMAGE_DIR = "data/images/openai"
+
 
 # --------------------------- ASSISTANT TYPES ---------------------------
 
@@ -75,6 +77,30 @@ OPENAI_SUPER_ASSISTANT_PROMPT_HEAD = f"""You are a friendly, ultra helpful, atte
             </detail>
         </parameter-details>
     </image-generation>
+    <image-conversion>
+        <name>convert_image</name>
+        <trigger>If the human companion requests an image format conversion, use this tool.</trigger>
+        <parameter-details>
+            <detail>
+                Ensure the image_format parameter is set to the desired format (e.g., 'jpg', 'png').
+            </detail>
+            <detail>
+                Use the version_numbers parameter to specify which image versions to convert.
+            </detail>
+        </parameter-details>
+    </image-conversion>
+    <image-resize>
+        <name>resize_image</name>
+        <trigger>If the human companion requests an image resize, use this tool.</trigger>
+        <parameter-details>
+            <detail>
+                Specify the desired width and height in pixels.
+            </detail>
+            <detail>
+                Use the version_numbers parameter to specify which image versions to resize.
+            </detail>
+        </parameter-details>
+    </image-resize>
 </tools>
 
 <previous-interactions>

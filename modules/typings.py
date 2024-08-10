@@ -40,3 +40,21 @@ class GenerateImageParams(BaseModel):
     image_ratio: Optional[ImageRatio]
     variate: Optional[bool]
     style: Optional[Style]
+
+
+class ImageFormat(str, Enum):
+    JPEG = "jpeg"
+    PNG = "png"
+    GIF = "gif"
+    BMP = "bmp"
+    TIFF = "tiff"
+
+
+class ConvertImageParams(BaseModel):
+    version_numbers: List[int]
+    image_format: ImageFormat
+
+class ResizeImageParams(BaseModel):
+    version_numbers: List[int]
+    width: int
+    height: int

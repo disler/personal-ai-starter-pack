@@ -8,8 +8,10 @@ from pydantic import BaseModel
 import openai
 from openai import OpenAI
 
+NEW_GPT_4o_AUG = "gpt-4o-2024-08-06"
 
-def example_1():
+
+def structured_output_tool_call():
 
     class Table(str, Enum):
         orders = "orders"
@@ -54,7 +56,7 @@ def example_1():
     client = OpenAI()
 
     completion = client.beta.chat.completions.parse(
-        model="gpt-4o-2024-08-06",
+        model=NEW_GPT_4o_AUG,
         messages=[
             {
                 "role": "system",
@@ -89,15 +91,18 @@ def example_1():
 
     # Parse the completion result and pass it to the mock function if available
     if completion.choices and completion.choices[0].message.tool_calls:
-        query_result = (
-            completion.choices[0].message.tool_calls[0].function.parsed_arguments
-        )
-        mock_query_function(query_result)
+        if completion.choices[0].message.tool_calls[0].function.name == "Query  ":
+            query_result = (
+                completion.choices[0].message.tool_calls[0].function.parsed_arguments
+            )
+            mock_query_function(query_result)
+        else:
+            print(f"{completion.choices and completion.choices[0].message.content}")
     else:
         print(f"{completion.choices and completion.choices[0].message.content}")
 
 
-def example_2():
+def structured_output_minimal():
 
     class Step(BaseModel):
         explanation: str
@@ -110,7 +115,7 @@ def example_2():
     client = OpenAI()
 
     completion = client.beta.chat.completions.parse(
-        model="gpt-4o-2024-08-06",
+        model=NEW_GPT_4o_AUG,
         messages=[
             {"role": "system", "content": "You are a helpful math tutor."},
             {"role": "user", "content": "solve 8x + 31 = 2"},
@@ -126,5 +131,5 @@ def example_2():
         print(message.refusal)
 
 
-example_1()
-# example_2()
+structured_output_minimal()
+structured_output_tool_call()
