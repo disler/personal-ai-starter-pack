@@ -104,6 +104,15 @@ OPENAI_SUPER_ASSISTANT_PROMPT_HEAD = f"""You are a friendly, ultra helpful, atte
             </detail>
         </parameter-details>
     </image-resize>
+    <open-image-directory>
+        <name>open_image_directory</name>
+        <trigger>If the human companion requests to open the image directory, use this tool.</trigger>
+        <parameter-details>
+            <detail>
+                This tool doesn't require any parameters.
+            </detail>
+        </parameter-details>
+    </open-image-directory>
 </tools>
 
 <previous-interactions>

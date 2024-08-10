@@ -57,3 +57,6 @@ class ResizeImageParams(BaseModel):
     version_numbers: List[int]
     width: int
     height: int
+
+class OpenImageDirParams(BaseModel):
+    pass

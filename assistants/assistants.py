@@ -12,6 +12,7 @@ import assemblyai as aai
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 from PIL import Image
+import subprocess
 from modules.constants import (
     OPENAI_IMG_AGENT_DIR,
     ELEVEN_LABS_CRINGE_VOICE,
@@ -28,6 +29,7 @@ from modules.typings import (
     ImageRatio,
     Style,
     ResizeImageParams,
+    OpenImageDirParams,
 )
 
 
@@ -297,6 +299,18 @@ class OpenAISuperPAF(OpenAIPAF):
 
         return True
 
+    def open_image_directory(self, open_image_dir_params: OpenImageDirParams) -> bool:
+        try:
+            if os.name == 'nt':  # For Windows
+                os.startfile(self.download_directory)
+            elif os.name == 'posix':  # For macOS and Linux
+                subprocess.call(['open', self.download_directory])
+            print(f"📂 Opened image directory: {self.download_directory}")
+            return True
+        except Exception as e:
+            print(f"Error opening image directory: {str(e)}")
+            return False
+
     def think(self, thought: str) -> str:
         client = openai.OpenAI()
         completion = client.beta.chat.completions.parse(
@@ -309,6 +323,7 @@ class OpenAISuperPAF(OpenAIPAF):
                 openai.pydantic_function_tool(GenerateImageParams),
                 openai.pydantic_function_tool(ConvertImageParams),
                 openai.pydantic_function_tool(ResizeImageParams),
+                openai.pydantic_function_tool(OpenImageDirParams),
             ],
         )
 
@@ -331,29 +346,20 @@ Calling..."""
 
             success = False
 
-            # TOOL 1
-            if tool_call.function.name == "GenerateImageParams":
+            tool_call_success_prompt = f"Quickly let your human companion know that you've run the '{tool_call.function.name}' tool. Respond in a short, conversational manner, no fluff."
+
+            tool_function_map = {
+                "GenerateImageParams": self.generate_image,
+                "ConvertImageParams": self.convert_image,
+                "ResizeImageParams": self.resize_image,
+                "OpenImageDirParams": self.open_image_directory,
+            }
+
+            if tool_call.function.name in tool_function_map:
                 # 🚀 GUARANTEED OUTPUT STRUCTURE 🚀
-                generate_image_params: GenerateImageParams = (
-                    tool_call.function.parsed_arguments
-                )
-                success = self.generate_image(generate_image_params)
-                tool_call_success_prompt = "Quickly let your human companion know that you've run the 'GenerateImageParams' tool. Respond in a short, conversational manner, no fluff."
-            # TOOL 2
-            elif tool_call.function.name == "ConvertImageParams":
-                # 🚀 GUARANTEED OUTPUT STRUCTURE 🚀
-                convert_image_params: ConvertImageParams = (
-                    tool_call.function.parsed_arguments
-                )
-                success = self.convert_image(convert_image_params)
-                tool_call_success_prompt = "Quickly let your human companion know that you've run the 'ConvertImageParams' tool. Respond in a short, conversational manner, no fluff."
-            elif tool_call.function.name == "ResizeImageParams":
-                # 🚀 GUARANTEED OUTPUT STRUCTURE 🚀
-                resize_image_params: ResizeImageParams = (
-                    tool_call.function.parsed_arguments
-                )
-                success = self.resize_image(resize_image_params)
-                tool_call_success_prompt = "Quickly let your human companion know that you've run the 'ResizeImageParams' tool. Respond in a short, conversational manner, no fluff."
+                params = tool_call.function.parsed_arguments
+                success = tool_function_map[tool_call.function.name](params)
+                tool_call_success_prompt = f"Quickly let your human companion know that you've run the '{tool_call.function.name}' tool. Respond in a short, conversational manner, no fluff."
             else:
                 success = False
                 tool_call_success_prompt = (
