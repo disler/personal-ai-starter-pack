@@ -48,8 +48,8 @@
   - Update the assistant type to the one you want to use.
 
 ## Watch the walk through video
-[Age of RELIABLE AI Agents: Legit Structured Outputs Use Cases (Strawberry Agent?)](https://youtu.be/PoO7Zjsvx0k)
-[CONTROL your Personal AI Assistant with GPT-4o mini & ElevenLabs](https://youtu.be/ikaKpfUOb0U)
+- [Coding RELIABLE AI Agents: Legit Structured Outputs Use Cases (Strawberry Agent?)](https://youtu.be/PoO7Zjsvx0k)
+- [CONTROL your Personal AI Assistant with GPT-4o mini & ElevenLabs](https://youtu.be/ikaKpfUOb0U)
 
 ## Resources
 - https://openai.com/index/introducing-structured-outputs-in-the-api/
