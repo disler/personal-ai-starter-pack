@@ -1,9 +1,12 @@
-# Fast Personal AI Assistant
-> Fast TTS & STT
+# Fast Personal AI Assistant & Structured Output
 >
 > A quick start personal AI assistant framework using OpenAI, Groq, AssemblyAI and ElevenLabs.
+>
+> And a breakdown of the reliability of AI agents with the new structured output.
 
+![reliable-ai-agents.png](./img/reliable-ai-agents.png)
 ![own-your-ai](./img/own-your-ai.png)
+
 
 ## Setup
 
@@ -30,6 +33,11 @@
   python main.py
   ```
 
+- Run the structured output script:
+  ```bash
+  python structured_outputs_example.py
+  ```
+
 - Press `Enter` to start recording, and `Enter` again to stop recording.
 
 - Adjust the maximum duration of the recording in `constants.py: DURATION`
@@ -40,9 +48,11 @@
   - Update the assistant type to the one you want to use.
 
 ## Watch the walk through video
+[Age of RELIABLE AI Agents: Legit Structured Outputs Use Cases (Strawberry Agent?)](https://youtu.be/PoO7Zjsvx0k)
 [CONTROL your Personal AI Assistant with GPT-4o mini & ElevenLabs](https://youtu.be/ikaKpfUOb0U)
 
 ## Resources
+- https://openai.com/index/introducing-structured-outputs-in-the-api/
 - https://www.assemblyai.com/ 
 - https://console.groq.com/docs/speech-text
 - https://console.groq.com/docs/libraries
