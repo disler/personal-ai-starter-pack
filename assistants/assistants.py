@@ -175,7 +175,7 @@ class GroqElevenPAF(PersonalAssistantFramework):
         with open(file_path, "rb") as file:
             transcription = self.groq_client.audio.transcriptions.create(
                 file=(file_path, file.read()),
-                model="whisper-large-v3",
+                model="distil-whisper-large-v3-en",
                 response_format="text",
             )
         return str(transcription)
@@ -184,7 +184,7 @@ class GroqElevenPAF(PersonalAssistantFramework):
     def generate_voice_audio(self, text: str):
         audio_generator = self.elevenlabs_client.generate(
             text=text,
-            voice=ELEVEN_LABS_CRINGE_VOICE,
+            voice=ELEVEN_LABS_PRIMARY_SOLID_VOICE,
             model="eleven_turbo_v2_5",
             stream=False,
         )
@@ -301,16 +301,17 @@ class OpenAISuperPAF(OpenAIPAF):
 
     def open_image_directory(self, open_image_dir_params: OpenImageDirParams) -> bool:
         try:
-            if os.name == 'nt':  # For Windows
+            if os.name == "nt":  # For Windows
                 os.startfile(self.download_directory)
-            elif os.name == 'posix':  # For macOS and Linux
-                subprocess.call(['open', self.download_directory])
+            elif os.name == "posix":  # For macOS and Linux
+                subprocess.call(["open", self.download_directory])
             print(f"📂 Opened image directory: {self.download_directory}")
             return True
         except Exception as e:
             print(f"Error opening image directory: {str(e)}")
             return False
 
+    @PersonalAssistantFramework.timeit_decorator
     def think(self, thought: str) -> str:
         client = openai.OpenAI()
         completion = client.beta.chat.completions.parse(
