@@ -17,8 +17,10 @@ from modules.constants import (
     OPENAI_IMG_AGENT_DIR,
     ELEVEN_LABS_CRINGE_VOICE,
     ELEVEN_LABS_PRIMARY_SOLID_VOICE,
+    SIXTYDB_PRIMARY_VOICE,
 )
 from modules.simple_llm import build_mini_model, build_new_gpt4o, prompt
+from modules.sixtydb import generate_tts_bytes
 from dotenv import load_dotenv
 import openai
 from groq import Groq
@@ -190,6 +192,72 @@ class GroqElevenPAF(PersonalAssistantFramework):
         )
         audio_bytes = b"".join(list(audio_generator))
         return audio_bytes
+
+    def speak(self, text: str):
+        audio = self.generate_voice_audio(text)
+        play(audio)
+
+    @PersonalAssistantFramework.timeit_decorator
+    def think(self, thought: str) -> str:
+        return prompt(self.llm_model, thought)
+
+
+class AssSixtyDBPAF(PersonalAssistantFramework):
+    """AssemblyAI speech-to-text + 60db text-to-speech."""
+
+    def setup(self):
+        aai.settings.api_key = os.getenv("ASSEMBLYAI_API_KEY")
+        self.sixtydb_api_key = os.getenv("SIXTYDB_API_KEY")
+        self.llm_model = build_mini_model()
+
+    @PersonalAssistantFramework.timeit_decorator
+    def transcribe(self, file_path):
+        transcriber = aai.Transcriber()
+        transcript = transcriber.transcribe(file_path)
+        return transcript.text
+
+    @PersonalAssistantFramework.timeit_decorator
+    def generate_voice_audio(self, text: str):
+        return generate_tts_bytes(
+            text=text,
+            api_key=self.sixtydb_api_key,
+            voice_id=SIXTYDB_PRIMARY_VOICE,
+        )
+
+    def speak(self, text: str):
+        audio = self.generate_voice_audio(text)
+        play(audio)
+
+    @PersonalAssistantFramework.timeit_decorator
+    def think(self, thought: str) -> str:
+        return prompt(self.llm_model, thought)
+
+
+class GroqSixtyDBPAF(PersonalAssistantFramework):
+    """Groq speech-to-text + 60db text-to-speech."""
+
+    def setup(self):
+        self.groq_client = Groq()
+        self.sixtydb_api_key = os.getenv("SIXTYDB_API_KEY")
+        self.llm_model = build_mini_model()
+
+    @PersonalAssistantFramework.timeit_decorator
+    def transcribe(self, file_path):
+        with open(file_path, "rb") as file:
+            transcription = self.groq_client.audio.transcriptions.create(
+                file=(file_path, file.read()),
+                model="distil-whisper-large-v3-en",
+                response_format="text",
+            )
+        return str(transcription)
+
+    @PersonalAssistantFramework.timeit_decorator
+    def generate_voice_audio(self, text: str):
+        return generate_tts_bytes(
+            text=text,
+            api_key=self.sixtydb_api_key,
+            voice_id=SIXTYDB_PRIMARY_VOICE,
+        )
 
     def speak(self, text: str):
         audio = self.generate_voice_audio(text)

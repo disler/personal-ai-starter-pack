@@ -12,6 +12,13 @@ DURATION = 30  # Duration of the recording in seconds
 ELEVEN_LABS_PRIMARY_SOLID_VOICE = "WejK3H1m7MI9CHnIjW9K"
 ELEVEN_LABS_CRINGE_VOICE = "uyfkySFC5J00qZ6iLAdh"
 
+# --------------------------- 60db (SIXTYDB) TTS ---------------------------
+SIXTYDB_BASE_URL = "https://api.60db.ai"
+SIXTYDB_DEFAULT_OUTPUT_FORMAT = "mp3"  # mp3 | wav | ogg | flac
+# Set a specific 60db voice_id here, or leave as None to use the 60db
+# system default voice. Find your voice_ids via GET https://api.60db.ai/myvoices
+SIXTYDB_PRIMARY_VOICE = None
+
 OPENAI_IMG_AGENT_DIR = "data/images/openai"
 
 
@@ -24,6 +31,10 @@ ASSISTANT_TYPE = "OpenAISuperPAF"
 # ASSISTANT_TYPE = "GroqElevenPAF"
 
 # ASSISTANT_TYPE = "AssElevenPAF"
+
+# ASSISTANT_TYPE = "AssSixtyDBPAF"   # AssemblyAI STT + 60db TTS
+
+# ASSISTANT_TYPE = "GroqSixtyDBPAF"  # Groq STT + 60db TTS
 
 
 # ---------------------------- PROMPT

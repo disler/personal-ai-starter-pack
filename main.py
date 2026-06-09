@@ -19,7 +19,14 @@ from modules.constants import (
 )
 
 from modules.typings import Interaction
-from assistants.assistants import OpenAISuperPAF, OpenAIPAF, AssElevenPAF, GroqElevenPAF
+from assistants.assistants import (
+    OpenAISuperPAF,
+    OpenAIPAF,
+    AssElevenPAF,
+    GroqElevenPAF,
+    AssSixtyDBPAF,
+    GroqSixtyDBPAF,
+)
 
 load_dotenv()
 
@@ -140,6 +147,12 @@ def main():
     elif ASSISTANT_TYPE == "GroqElevenPAF":
         assistant = GroqElevenPAF()
         print("🚀 Initialized Groq-ElevenLabs Personal AI Assistant...")
+    elif ASSISTANT_TYPE == "AssSixtyDBPAF":
+        assistant = AssSixtyDBPAF()
+        print("🚀 Initialized AssemblyAI-60db Personal AI Assistant...")
+    elif ASSISTANT_TYPE == "GroqSixtyDBPAF":
+        assistant = GroqSixtyDBPAF()
+        print("🚀 Initialized Groq-60db Personal AI Assistant...")
     else:
         raise ValueError(f"Invalid assistant type: {ASSISTANT_TYPE}")
 
